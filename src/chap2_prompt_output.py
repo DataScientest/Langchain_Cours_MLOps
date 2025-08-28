@@ -19,12 +19,12 @@ print("Catégorie :", response.category)
 print("Confiance :", response.confidence)
 
 # 2. Résumé
-print("\n--- Résumé en 3 points ---")
+print("\n--- Résumé ---")
 response = summary_chain.invoke({
     "texte": doc,
     "format_instructions": summary_chain.steps[-1].get_format_instructions()
 })
-print("Résumé en 3 points :", response.summary_points)
+print("Résumé :", response.summary)
 
 # 3. Traduction (avec streaming)
 print("\n--- Traduction (Streaming) ---")

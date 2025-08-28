@@ -4,7 +4,7 @@ from src.prompts.prompts import (
     classification_prompt,
     translation_prompt,
 )
-from core.parsers import (
+from src.core.parsers import (
     classification_parser,
     summary_parser,
     translation_parser,

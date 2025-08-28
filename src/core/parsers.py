@@ -10,7 +10,7 @@ classification_parser = PydanticOutputParser(pydantic_object=ClassificationResul
 
 # 2. Résumé
 class SummaryResult(BaseModel):
-    summary_points: list[str] = Field(..., description="Résumé du texte en 3 points principaux")
+    summary: str = Field(..., description="Résumé concis du texte")
 
 summary_parser = PydanticOutputParser(pydantic_object=SummaryResult)
 

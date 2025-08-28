@@ -26,22 +26,19 @@ summary_prompt = ChatPromptTemplate.from_messages([
     
     # Few-shot
     ("human", 
-     "Résume le texte suivant en 3 points principaux bien concis.\n\n"
+     "Résume le texte suivant de la façon la plus concise possible :\n\n"
      "Texte : L'intelligence artificielle est un domaine en pleine expansion, "
      "qui combine mathématiques, informatique et sciences cognitives."),
     ("ai", 
-     '{{"summary_points": ["IA = domaine en croissance", '
-     '"Combinaison de plusieurs disciplines", '
-     '"Utilisation large dans divers secteurs"]}}'),
+     '{{"summary": "L’IA est un domaine en croissance qui associe mathématiques, informatique et sciences cognitives."}}'),
     
     # Instruction générale
     ("human", 
-     "Résume le texte suivant en 3 points principaux bien concis.\n\n"
+     "Résume le texte suivant de la façon la plus concise possible.\n\n"
      "IMPORTANT : Réponds UNIQUEMENT avec un JSON valide, sans texte en dehors du JSON.\n\n"
      "Texte : {texte}\n\n"
      "{format_instructions}")
 ])
-
 
 # Traduction
 translation_prompt = ChatPromptTemplate.from_messages([
