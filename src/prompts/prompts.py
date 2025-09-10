@@ -22,11 +22,11 @@ classification_prompt = ChatPromptTemplate.from_messages([
 
 # Résumé 
 summary_prompt = ChatPromptTemplate.from_messages([
-    ("system", "Tu es un assistant qui résume des textes."),
+    ("system", "Tu es un assistant qui résume des textes en reprenant les mots importants du texte d'origine."),
     
     # Few-shot
     ("human", 
-     "Résume le texte suivant de la façon la plus concise possible :\n\n"
+     "Résume le texte suivant et veille à garder les mots clés les plus importants :\n\n"
      "Texte : L'intelligence artificielle est un domaine en pleine expansion, "
      "qui combine mathématiques, informatique et sciences cognitives."),
     ("ai", 
@@ -34,7 +34,7 @@ summary_prompt = ChatPromptTemplate.from_messages([
     
     # Instruction générale
     ("human", 
-     "Résume le texte suivant de la façon la plus concise possible.\n\n"
+     "Résume le texte suivant et veille à garder les mots clés les plus importants.\n\n"
      "IMPORTANT : Réponds UNIQUEMENT avec un JSON valide, sans texte en dehors du JSON.\n\n"
      "Texte : {texte}\n\n"
      "{format_instructions}")
