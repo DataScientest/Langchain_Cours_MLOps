@@ -1,4 +1,4 @@
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 # Classification 
 classification_prompt = ChatPromptTemplate.from_messages([
@@ -24,14 +24,6 @@ classification_prompt = ChatPromptTemplate.from_messages([
 summary_prompt = ChatPromptTemplate.from_messages([
     ("system", "Tu es un assistant qui résume des textes en reprenant les mots importants du texte d'origine."),
     
-    # Few-shot
-    ("human", 
-     "Résume le texte suivant et veille à garder les mots clés les plus importants :\n\n"
-     "Texte : L'intelligence artificielle est un domaine en pleine expansion, "
-     "qui combine mathématiques, informatique et sciences cognitives."),
-    ("ai", 
-     '{{"summary": "L’IA est un domaine en croissance qui associe mathématiques, informatique et sciences cognitives."}}'),
-    
     # Instruction générale
     ("human", 
      "Résume le texte suivant et veille à garder les mots clés les plus importants.\n\n"
@@ -52,4 +44,10 @@ translation_prompt = ChatPromptTemplate.from_messages([
     ("human", 
      "Traduis ce texte en anglais : {texte}\n\n"
      "{format_instructions}")
+])
+
+chat_prompt = ChatPromptTemplate.from_messages([
+    ("system", "Tu es un assistant conversationnel utile et amical."),
+    MessagesPlaceholder(variable_name="history"),
+    ("human", "{input}")
 ])

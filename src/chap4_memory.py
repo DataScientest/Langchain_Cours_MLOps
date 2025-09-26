@@ -1,5 +1,4 @@
 from src.memory.session import SessionManager
-from src.memory.memory import SummarizedHistoryWrapper   
 from src.core.llm import llm
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory

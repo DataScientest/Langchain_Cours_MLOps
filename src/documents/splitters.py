@@ -8,7 +8,7 @@ def add_overlap(prev_chunk: str, next_chunk: str, num_sentences: int = 2) -> str
     return " ".join(overlap_sentences) + " " + next_chunk
 
 
-def split_documents(documents, max_tokens: int = 600, overlap_sentences: int = 2):
+def split_documents(documents, max_tokens: int = 1000, overlap_sentences: int = 2):
     if not documents:
         return []
 

@@ -61,7 +61,6 @@ class SessionManager:
             raise ValueError("Type de mémoire inconnu")
 
     def read_session(self, user_id: str):
-        """Affiche l’historique (brut ou résumé) pour un utilisateur"""
+        """Retourne l’historique (brut ou résumé) pour un utilisateur"""
         memory = self.create_session(user_id)
-        for msg in memory.messages:
-            print(f"{msg.type.upper()} : {msg.content}")
+        return [{"type": msg.type, "content": msg.content} for msg in memory.messages]

@@ -3,6 +3,7 @@ from src.prompts.prompts import (
     summary_prompt,
     classification_prompt,
     translation_prompt,
+    chat_prompt
 )
 from src.core.parsers import (
     classification_parser,
@@ -18,3 +19,5 @@ classification_chain = classification_prompt | llm | classification_parser
 
 # 3. Traduction
 translation_chain = translation_prompt | llm | translation_parser
+
+chat_chain = chat_prompt | llm

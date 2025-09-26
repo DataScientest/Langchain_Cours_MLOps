@@ -5,7 +5,6 @@ from src.utils.token import count_tokens
 
 
 def summarize_messages(messages):
-    """Construit un résumé long (~1000 tokens) de l’historique complet."""
     content = "\n".join([f"{msg.type.upper()}: {msg.content}" for msg in messages])
 
     prompt = ChatPromptTemplate.from_messages([
@@ -13,12 +12,11 @@ def summarize_messages(messages):
         ("system", "Summarize the following conversation into about 1000 tokens. "
                    "Keep important details like user identity, preferences, goals, "
                    "facts, and key points mentioned."),
-        ("human", content)
+        ("human", "{input}")   
     ])
 
     chain = prompt | llm
     return chain.invoke({"input": content}).content
-
 
 class SummarizedHistoryWrapper:
     """Wrapper qui choisit entre l’historique brut et un résumé."""
