@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from langchain.agents import create_agent
 from langchain.agents.structured_output import ToolStrategy
@@ -81,3 +82,29 @@ def test_agent_structured_response_format():
 
     assert result["structured_response"] == DocAnswer(answer="L'IA", source_used="data/pdf/1.pdf")
     assert any(isinstance(m, ToolMessage) for m in result["messages"])
+
+
+class _ProviderError(Exception):
+    def __init__(self, status_code):
+        super().__init__(f"provider error {status_code}")
+        self.status_code = status_code
+
+
+class _FailingAgent:
+    def __init__(self, error):
+        self.error = error
+
+    def invoke(self, *args, **kwargs):
+        raise self.error
+
+
+@pytest.mark.parametrize(
+    ("error", "expected"),
+    [(_ProviderError(429), 429), (_ProviderError(413), 413), (_ProviderError(500), 502), (RuntimeError("boom"), 502)],
+)
+def test_agent_endpoint_maps_provider_errors(monkeypatch, error, expected):
+    monkeypatch.setattr(main, "doc_agent", _FailingAgent(error))
+
+    response = client.post("/agent", json={"file_path": "data/pdf/1.pdf", "query": "?"})
+
+    assert response.status_code == expected

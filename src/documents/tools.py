@@ -25,7 +25,7 @@ def search_keyword_tool(chunks: list, query: str, k: int = 3) -> list:
     return keyword_search(chunks, query, k=k)
 
 @tool
-def read_pdf_excerpt_tool(path: str, max_tokens: int = 3000) -> str:
+def read_pdf_excerpt_tool(path: str, max_tokens: int = 1500) -> str:
     """Read a PDF and return a cleaned excerpt (start of the document) for analysis."""
     text = " ".join(clean_text(doc.page_content) for doc in load_pdf(path))
     return truncate_to_tokens(text, max_tokens)

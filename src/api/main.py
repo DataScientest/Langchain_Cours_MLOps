@@ -34,17 +34,24 @@ def run_agent(input: AgentInput):
     if not input.file_path:
         raise HTTPException(status_code=400, detail="Le chemin du fichier est obligatoire.")
 
-    result = doc_agent.invoke({
-        "messages": [
-            {
-                "role": "user",
-                "content": (
-                    f"Charge le document situé ici : {input.file_path}. "
-                    f"Ensuite, réponds à cette question : {input.query}"
-                ),
-            }
-        ]
-    })
+    try:
+        result = doc_agent.invoke({
+            "messages": [
+                {
+                    "role": "user",
+                    "content": (
+                        f"Charge le document situé ici : {input.file_path}. "
+                        f"Ensuite, réponds à cette question : {input.query}"
+                    ),
+                }
+            ]
+        })
+    except Exception as error:
+        status_code = getattr(error, "status_code", None)
+        if status_code in (413, 429):
+            raise HTTPException(status_code=status_code, detail="Limite du fournisseur de modèle atteinte. Réessayez dans une minute.")
+        raise HTTPException(status_code=502, detail="Le modèle n'a pas pu répondre.")
+
     return {"response": result["messages"][-1].content}
 
 @app.post("/chat")
