@@ -10,6 +10,6 @@ from src.prompts.prompts import (
     translation_prompt,
 )
 
-classification_chain = classification_prompt | llm.with_structured_output(ClassificationResult)
-summary_chain = summary_prompt | llm.with_structured_output(SummaryResult)
-translation_chain = translation_prompt | llm.with_structured_output(TranslationResult)
+classification_chain = classification_prompt | llm.with_structured_output(ClassificationResult, method="json_schema")
+summary_chain = summary_prompt | llm.with_structured_output(SummaryResult, method="json_schema")
+translation_chain = translation_prompt | llm.with_structured_output(TranslationResult, method="json_schema")
