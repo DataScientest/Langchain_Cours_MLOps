@@ -4,7 +4,7 @@ import runpy
 def test_session_example_runs(capsys):
     runpy.run_module("src.memory.session", run_name="__main__")
     out = capsys.readouterr().out
-    # Le modèle factice recopie les messages reçus : le 3e appel voit tout l'historique.
+    # The fake model echoes the messages it receives: the 3rd call sees the whole history.
     assert "je m'appelle Alice." in out.splitlines()[-1]
     assert "J'étudie la médecine." in out.splitlines()[-1]
 

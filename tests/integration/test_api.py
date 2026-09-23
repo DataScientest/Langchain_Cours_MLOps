@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 from langchain.agents import create_agent
+from langchain.agents.structured_output import ToolStrategy
 from langchain_core.messages import AIMessage, ToolMessage
 from pydantic import BaseModel
 
@@ -18,12 +19,12 @@ def test_summary_and_translate():
     assert translate.status_code == 200 and set(translate.json()) == {"translated_text"}
 
 
-def test_agent_endpoint_calls_pdf_tool(monkeypatch):
+def test_agent_endpoint_calls_pdf_excerpt_tool(monkeypatch):
     model = ToolCallingFakeChatModel(
         messages=iter([
             AIMessage(
                 content="",
-                tool_calls=[{"name": "load_pdf_tool", "args": {"path": "data/pdf/1.pdf"}, "id": "t1"}],
+                tool_calls=[{"name": "read_pdf_excerpt_tool", "args": {"path": "data/pdf/1.pdf"}, "id": "t1"}],
             ),
             AIMessage(content="Le document traite de l'intelligence artificielle."),
         ])
@@ -74,7 +75,7 @@ def test_agent_structured_response_format():
             ),
         ])
     )
-    agent = create_agent(model, tools=TOOLS, response_format=DocAnswer)
+    agent = create_agent(model, tools=TOOLS, response_format=ToolStrategy(DocAnswer))
 
     result = agent.invoke({"messages": [{"role": "user", "content": "Sujet ?"}]})
 

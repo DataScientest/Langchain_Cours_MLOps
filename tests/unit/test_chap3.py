@@ -4,8 +4,14 @@ from src.documents.cleaners import clean_text
 from src.documents.loaders import load_pdf
 from src.documents.search import keyword_search
 from src.documents.splitters import split_documents
-from src.documents.tools import clean_text_tool, count_tokens_tool, load_pdf_tool, search_keyword_tool
-from src.utils.token import count_tokens
+from src.documents.tools import (
+    clean_text_tool,
+    count_tokens_tool,
+    load_pdf_tool,
+    read_pdf_excerpt_tool,
+    search_keyword_tool,
+)
+from src.utils.token import count_tokens, truncate_to_tokens
 
 
 def test_clean_text():
@@ -31,6 +37,19 @@ def test_document_tools():
     assert len(load_pdf_tool.invoke({"path": "data/pdf/3.pdf"})) == 5
     assert clean_text_tool.invoke({"text": "a   b"}) == "a b"
     assert count_tokens_tool.invoke({"text": "bonjour"}) > 0
+
+
+def test_truncate_to_tokens():
+    text = "un deux trois quatre cinq " * 100
+    assert count_tokens(truncate_to_tokens(text, 50)) <= 50
+    assert truncate_to_tokens("court", 50) == "court"
+
+
+def test_read_pdf_excerpt_tool_is_bounded():
+    excerpt = read_pdf_excerpt_tool.invoke({"path": "data/pdf/1.pdf"})
+    assert excerpt.startswith("Intelligence artificielle")
+    assert count_tokens(excerpt) <= 3000
+    assert count_tokens(read_pdf_excerpt_tool.invoke({"path": "data/pdf/1.pdf", "max_tokens": 200})) <= 200
 
 
 def test_chap3_script_runs(capsys):

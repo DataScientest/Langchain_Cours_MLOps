@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Vérifie que les versions épinglées sont identiques dans toutes les branches chapN
-# (pyproject.toml + uv.lock) et, en option, dans le repo d'examen.
+# Check that pinned versions are identical in every chapN branch
+# (pyproject.toml + uv.lock) and, optionally, in the exam repository.
 #
-# Usage :
+# Usage:
 #   scripts/check_versions.sh                        # compare origin/chap1..origin/chap5
-#   REFS="chap1 chap2" scripts/check_versions.sh     # autres refs git
+#   REFS="chap1 chap2" scripts/check_versions.sh     # other git refs
 #   EXAM_PYPROJECT=../exam_Langchain/pyproject.toml scripts/check_versions.sh
 set -euo pipefail
 
@@ -25,7 +25,7 @@ for ref in $REFS; do
   if git cat-file -e "$ref:uv.lock" 2>/dev/null; then
     git show "$ref:uv.lock" | extract_lock | grep -E '^(langchain|langgraph|langsmith)' | sed "s|$| $ref:uv.lock|" >> "$pins"
   else
-    echo "ERREUR : uv.lock absent de $ref" >&2
+    echo "ERROR: uv.lock missing in $ref" >&2
     exit 1
   fi
 done
@@ -38,13 +38,13 @@ status=0
 for pkg in $(cut -d' ' -f1 "$pins" | sort -u); do
   versions=$(awk -v p="$pkg" '$1==p {print $2}' "$pins" | sort -u)
   if [[ $(echo "$versions" | wc -l) -gt 1 ]]; then
-    echo "ÉCART $pkg :"
+    echo "MISMATCH $pkg:"
     awk -v p="$pkg" '$1==p {print "  " $2 "  (" $3 ")"}' "$pins" | sort -u
     status=1
   fi
 done
 
 if [[ $status -eq 0 ]]; then
-  echo "OK : $(cut -d' ' -f1 "$pins" | sort -u | wc -l) paquets, versions identiques sur : $REFS ${EXAM_PYPROJECT}"
+  echo "OK: $(cut -d' ' -f1 "$pins" | sort -u | wc -l) packages, identical versions in: $REFS ${EXAM_PYPROJECT}"
 fi
 exit $status

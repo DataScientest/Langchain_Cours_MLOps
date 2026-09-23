@@ -1,4 +1,4 @@
-"""Tests communs à toutes les branches : la pile LangChain 1.x fonctionne sans clé API."""
+"""Shared tests for every branch: the LangChain 1.x stack works without an API key."""
 
 import importlib
 

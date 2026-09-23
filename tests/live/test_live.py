@@ -1,4 +1,4 @@
-"""Tests avec un vrai modèle : RUN_LIVE=1 uv run pytest -m live (GROQ_API_KEY requis)."""
+"""Tests against the real model: RUN_LIVE=1 uv run pytest -m live (requires GROQ_API_KEY)."""
 
 import importlib.util
 
@@ -8,7 +8,7 @@ pytestmark = pytest.mark.live
 
 
 def _requires(module):
-    return pytest.mark.skipif(importlib.util.find_spec(module) is None, reason=f"{module} absent de ce chapitre")
+    return pytest.mark.skipif(importlib.util.find_spec(module) is None, reason=f"{module} not part of this chapter")
 
 
 def test_llm_answers():
@@ -18,11 +18,50 @@ def test_llm_answers():
 
 
 @_requires("src.core.chains")
-def test_structured_output():
-    from src.core.chains import classification_chain
+@pytest.mark.parametrize("attempt", range(3))
+def test_structured_output_chains(attempt):
+    from src.core.chains import classification_chain, summary_chain, translation_chain
 
-    result = classification_chain.invoke({"input": "Kubernetes orchestre des conteneurs."})
-    assert 0 <= result.confidence <= 1
+    text = "Artificial intelligence helps machines solve problems and analyze data."
+    assert 0 <= classification_chain.invoke({"input": text}).confidence <= 1
+    assert summary_chain.invoke({"input": text}).summary
+    assert translation_chain.invoke({"input": "Bonjour, comment allez-vous ?"}).translated_text
+
+
+@_requires("src.agents.doc_agent")
+def test_doc_agent_reads_course_pdf():
+    from langchain_core.messages import ToolMessage
+
+    from src.agents.doc_agent import doc_agent
+
+    result = doc_agent.invoke({
+        "messages": [{"role": "user", "content": "Charge le PDF data/pdf/1.pdf puis explique son sujet principal."}]
+    })
+    assert any(isinstance(m, ToolMessage) and m.name == "read_pdf_excerpt_tool" for m in result["messages"])
+    assert "intelligence artificielle" in result["messages"][-1].content.lower()
+
+
+@_requires("src.agents.doc_agent")
+def test_doc_agent_structured_response():
+    import os
+
+    from langchain.agents import create_agent
+    from langchain.agents.structured_output import ToolStrategy
+    from pydantic import BaseModel
+
+    from src.agents.doc_agent import TOOLS
+
+    class DocAnswer(BaseModel):
+        answer: str
+        source_used: str
+
+    agent = create_agent(
+        model=os.getenv("CHAT_MODEL", "groq:openai/gpt-oss-120b"),
+        tools=TOOLS,
+        response_format=ToolStrategy(DocAnswer),
+    )
+    result = agent.invoke({"messages": [{"role": "user", "content": "Charge le PDF data/pdf/3.pdf puis donne son sujet."}]})
+    assert isinstance(result["structured_response"], DocAnswer)
 
 
 @_requires("src.agents.doc_agent")
