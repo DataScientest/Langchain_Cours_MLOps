@@ -1,61 +1,59 @@
 # Langchain_Cours_MLOps
 
-## Résumé Chapitre 4 : État et Mémoire
+## Version française
 
-Dans ce chapitre, nous avons appris à rendre notre assistant stateful (avec état), capable de se souvenir du contexte d’une conversation et de le réutiliser.
+### Résumé Chapitre 4 : État et mémoire
 
-1. Problème du stateless
-    - Par défaut, un LLM ne se souvient pas des échanges précédents.
-    - Cela limite fortement l’expérience utilisateur dans un chatbot ou un agent.
+1. `checkpointer` et `thread_id`
+    - `create_agent(..., checkpointer=InMemorySaver())` conserve l'état de chaque conversation.
+    - Le `thread_id` passé dans `config` identifie la conversation.
 
-2. Historiques de conversation
-    - **InMemoryChatMessageHistory** : stockage en RAM, simple mais non persistant. 
-    - **FileChatMessageHistory** : stockage en JSON local, persistant entre redémarrages.  
-    - **SQLChatMessageHistory** : stockage en base SQL, adapté au multi-utilisateurs.
+2. Plusieurs utilisateurs
+    - Un `thread_id` par utilisateur : les historiques d'Alice, Bob et Charlie restent séparés (`src/chap4_memory.py`).
 
-3. Gestion de sessions multi-utilisateurs
-    - Mise en place d’un SessionManager qui attribue un session_id unique à chaque utilisateur.
-    - Chaque utilisateur conserve son propre historique, isolé des autres.
+3. Optimiser l'historique
+    - Fenêtrage, résumé, mémoire ciblée : renvoyer le bon contexte au bon moment.
 
-4. RunnableWithMessageHistory
-    - Intégration automatique de l’historique dans le prompt.
-    - Ajout des nouveaux échanges (humain / IA) directement en mémoire. 
-    - Simplifie la gestion de conversations persistantes.
+## Lancer le projet et les tests
 
-5. Optimisation de la mémoire
-    - Problème : un historique complet devient coûteux (tokens, latence, budget).
-    - Solution : un wrapper de résumé automatique (SummarizedHistoryWrapper) qui :
-        - Utilise l’historique brut tant qu’il reste court.
-        - Génère un résumé lorsque l’historique devient trop long.
+```bash
+uv sync
+uv run pytest       # tests hors ligne, sans clé API (modèles factices)
+```
 
-👉 Grâce à ces briques, nous avons désormais un assistant conversationnel robuste, persistant et scalable, capable de gérer plusieurs utilisateurs et de conserver les informations clés dans la durée.
+Les tests `live` appellent le vrai modèle et sont désactivés par défaut :
 
-## Summary Chapter 4: State & Memory
+```bash
+RUN_LIVE=1 uv run pytest -m live
+```
 
-In this chapter, we have learned how to make our assistant stateful (with state), capable of remembering the context of a conversation and reusing.
+Le modèle se configure dans `.env` avec `CHAT_MODEL` (par défaut `groq:openai/gpt-oss-120b`).
 
-1. Problem of stateless
-    - By default, an LLM does not remember the previous exchanges.
-    - This limits the user experience in a chatbot or an agent.
+## English version
 
-2. Conversation history
-    - **InMemoryChatMessageHistory** : in-memory storage, simple but not persistent.
-    - **FileChatMessageHistory** : local JSON storage, persistent between restarts.
-    - **SQLChatMessageHistory** : SQL-based storage, adapted for multi-user scenarios.
+### Summary Chapter 4: State and memory
 
-3. Managing multi-user sessions
-    - Setting up a SessionManager that assigns a unique session_id to each user.
-    - Each user retains their own history, isolated from others.
+1. `checkpointer` and `thread_id`
+    - `create_agent(..., checkpointer=InMemorySaver())` keeps the state of each conversation.
+    - The `thread_id` passed in `config` identifies the conversation.
 
-4. RunnableWithMessage
-    - Automatically injects conversation history into prompts.
-    - Logs new exchanges (human / AI) directly into memory.
-    - Simplifies the management of persistent conversations.
+2. Several users
+    - One `thread_id` per user: Alice, Bob and Charlie keep separate histories (`src/chap4_memory.py`).
 
-5. Memory optimization
-    - Problem: full history grows costly (tokens, latency, budget).
-    - Solution: a summarization wrapper (SummarizedHistoryWrapper) that: 
-        - Uses the raw history as long as it remains short.
-        - Generates a summary when the history becomes too long.
+3. Optimising the history
+    - Windowing, summaries, targeted memory: send the right context at the right time.
 
-👉 With these components, we now have a robust, persistent, and scalable conversational assistant, able to manage multiple users and retain key details over long interactions.
+## Run the project and the tests
+
+```bash
+uv sync
+uv run pytest       # offline tests, no API key needed (fake models)
+```
+
+`live` tests call the real model and are disabled by default:
+
+```bash
+RUN_LIVE=1 uv run pytest -m live
+```
+
+The model is set in `.env` with `CHAT_MODEL` (default: `groq:openai/gpt-oss-120b`).

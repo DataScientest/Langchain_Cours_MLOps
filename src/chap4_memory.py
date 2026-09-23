@@ -1,67 +1,63 @@
-from src.core.llm import llm
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+import os
+from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langgraph.checkpoint.memory import InMemorySaver
 
-prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a helpful document assistant."),
-    MessagesPlaceholder(variable_name="history"),
-    ("human", "{input}")
-])
+load_dotenv()
 
-chain = prompt | llm
+checkpointer = InMemorySaver()
 
-from src.memory.session import SessionManager
-from langchain_core.runnables import RunnableWithMessageHistory
-
-manager = SessionManager(memory_type="file", token_limit=500)
-
-conversation = RunnableWithMessageHistory(
-    chain,
-    lambda session_id: manager.create_session(session_id),
-    input_messages_key="input",
-    history_messages_key="history"
+agent = create_agent(
+    model=os.getenv("CHAT_MODEL", "groq:openai/gpt-oss-120b"),
+    tools=[],
+    system_prompt="Tu es un assistant utile et précis.",
+    checkpointer=checkpointer,
 )
 
-config = {"configurable": {"session_id": "alice"}}
+alice_config = {"configurable": {"thread_id": "alice"}}
+bob_config = {"configurable": {"thread_id": "bob"}}
+charlie_config = {"configurable": {"thread_id": "charlie"}}
 
-response = conversation.invoke({"input": "Hello, my name is Alice."}, config=config)
-print("IA:", response.content)
+agent.invoke(
+    {"messages": [{"role": "user", "content": "Bonjour, je m'appelle Alice."}]},
+    config=alice_config,
+)
 
-response = conversation.invoke({"input": "I am studying medicine."}, config=config)
-print("IA:", response.content)
+agent.invoke(
+    {"messages": [{"role": "user", "content": "Bonjour, je m'appelle Bob."}]},
+    config=bob_config,
+)
 
-text = """
-1. Origins and Milestones
-The journey of AI from Alan Turing’s theoretical musings to today’s deep learning revolution is indeed remarkable. The "AI winters" you mentioned highlight how progress often hinges on technological breakthroughs—like the advent of GPUs, big data, and advanced algorithms. The current era of AI is defined by its ability to learn from vast datasets, but it’s also shaped by the interdisciplinary collaboration between computer science, neuroscience, and cognitive psychology.
+agent.invoke(
+    {"messages": [{"role": "user", "content": "Je suis étudiante en médecine."}]},
+    config=alice_config,
+)
 
-2. Ubiquitous Applications
-AI’s integration into daily life—healthcare, finance, entertainment, and beyond—is a testament to its versatility. However, its "invisibility" raises important questions about transparency and user awareness. For example, while AI-driven recommendations enhance convenience, they also create filter bubbles, limiting exposure to diverse perspectives. The challenge lies in balancing efficiency with ethical design, ensuring users understand how AI influences their choices.
+agent.invoke(
+    {"messages": [{"role": "user", "content": "Bonjour, je m'appelle Charlie."}]},
+    config=charlie_config,
+)
 
-3. Undeniable Benefits
-AI’s potential to automate repetitive tasks and augment human capabilities is transformative. In fields like drug discovery or climate modeling, AI acts as a force multiplier, accelerating progress. Yet, as you noted, its benefits are unevenly distributed. The digital divide and access to AI tools could exacerbate global inequalities, making it crucial to democratize AI education and resources.
+agent.invoke(
+    {"messages": [{"role": "user", "content": "Je travaille dans la cybersécurité."}]},
+    config=bob_config,
+)
 
-4. Ethical and Social Challenges
-The ethical dilemmas you highlighted—job displacement, algorithmic bias, and surveillance—are among the most pressing issues today. For instance:
+alice_result = agent.invoke(
+    {"messages": [{"role": "user", "content": "Quel est mon nom et mon domaine d'étude ?"}]},
+    config=alice_config,
+)
 
-Bias: AI systems trained on biased data can perpetuate discrimination, as seen in hiring tools or facial recognition software. Addressing this requires diverse training datasets and ongoing audits of AI systems.
-Privacy: The use of AI in surveillance, especially in authoritarian regimes, poses risks to civil liberties. Striking a balance between security and privacy is a global challenge.
-Accountability: Who is responsible when an AI system makes a harmful decision? Legal frameworks are still catching up to the complexities of AI governance.
+bob_result = agent.invoke(
+    {"messages": [{"role": "user", "content": "Quel est mon nom et mon domaine ?"}]},
+    config=bob_config,
+)
 
+charlie_result = agent.invoke(
+    {"messages": [{"role": "user", "content": "Quel est mon nom ?"}]},
+    config=charlie_config,
+)
 
-5. The Myth of Neutrality
-AI is not neutral; it reflects the values and biases of its creators and the data it’s trained on. This underscores the need for ethical AI design, where interdisciplinary teams—including ethicists, sociologists, and policymakers—collaborate to mitigate harm. Initiatives like the EU’s AI Act and guidelines from organizations like the Partnership on AI are steps toward responsible AI development.
-
-6. Human-Machine Cohabitation
-The future of AI lies in augmentation, not replacement. AI can handle data-heavy tasks, but human creativity, empathy, and moral reasoning remain irreplaceable. For example, in healthcare, AI can assist in diagnostics, but the final decision—and the compassionate care—rests with human practitioners. The goal should be to design AI systems that empower, rather than diminish, human agency.
-
-7. Conclusion: Promise and Vigilance
-AI is a double-edged sword: it holds immense potential for progress but also risks if left unchecked. The key is proactive governance—shaping AI’s development through inclusive policies, public dialogue, and international cooperation. As you aptly put it, AI is a mirror of our humanity, reflecting our aspirations and flaws. The choices we make today will define whether AI becomes a tool for collective good or a source of division.
-""" 
-
-response = conversation.invoke({"input": text}, config=config)
-print("IA:", response.content)
-
-response = conversation.invoke({"input": "What is my name and my occupation ?"}, config=config)
-print("IA:", response.content)
-
-print("\n=== Alice's history ===")
-print(manager.read_session("alice"))
+print("Alice :", alice_result["messages"][-1].content)
+print("Bob :", bob_result["messages"][-1].content)
+print("Charlie :", charlie_result["messages"][-1].content)
