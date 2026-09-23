@@ -1,4 +1,4 @@
-"""Modèles factices pour tester le cours sans clé API."""
+"""Fake chat models used to test the course code without an API key."""
 
 from typing import Any
 
@@ -10,10 +10,10 @@ from langchain_core.utils.function_calling import convert_to_openai_tool
 
 
 class ToolCallingFakeChatModel(GenericFakeChatModel):
-    """GenericFakeChatModel qui accepte bind_tools (requis par create_agent).
+    """GenericFakeChatModel that accepts bind_tools (required by create_agent).
 
-    Les réponses (y compris les tool_calls simulés) sont fournies à l'avance
-    via `messages=iter([...])`.
+    Responses, including simulated tool_calls, are provided upfront
+    with `messages=iter([...])`.
     """
 
     def bind_tools(self, tools, **kwargs):
@@ -38,12 +38,12 @@ def _dummy_value(spec: dict[str, Any]) -> Any:
 
 
 class ScriptedFakeChatModel(BaseChatModel):
-    """Modèle factice déterministe utilisé à la place de `init_chat_model`.
+    """Deterministic fake model returned instead of `init_chat_model`.
 
-    - Sortie structurée (`with_structured_output`) : renvoie un tool_call dont
-      les arguments respectent le schéma Pydantic demandé.
-    - Sinon : répond en recopiant les messages humains reçus, ce qui permet de
-      vérifier le contenu de la mémoire d'une conversation.
+    - Structured output (`with_structured_output`): returns a tool_call whose
+      arguments match the requested Pydantic schema.
+    - Otherwise: echoes the human messages it received, which makes it possible
+      to check what a conversation memory contains.
     """
 
     bound_tools: list[Any] = []
