@@ -44,6 +44,11 @@ def test_agent_endpoint_rejects_empty_path():
     assert response.status_code == 400
 
 
+def test_agent_endpoint_rejects_missing_file():
+    response = client.post("/agent", json={"file_path": "data/pdf/missing.pdf", "query": "?"})
+    assert response.status_code == 404
+
+
 def test_chat_memory_and_history():
     client.post("/chat", json={"session_id": "alice", "query": "Bonjour, je m'appelle Alice."})
     client.post("/chat", json={"session_id": "bob", "query": "Bonjour, je m'appelle Bob."})

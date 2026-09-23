@@ -1,3 +1,4 @@
+from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from src.core.chains import summary_chain, translation_chain
@@ -33,6 +34,8 @@ def translate(input: TextInput):
 def run_agent(input: AgentInput):
     if not input.file_path:
         raise HTTPException(status_code=400, detail="Le chemin du fichier est obligatoire.")
+    if not Path(input.file_path).is_file():
+        raise HTTPException(status_code=404, detail="Fichier introuvable.")
 
     try:
         result = doc_agent.invoke({
