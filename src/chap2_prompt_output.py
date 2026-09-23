@@ -1,34 +1,19 @@
-from src.core.chains import classification_chain
-from src.core.parsers import classification_parser
+from src.core.chains import classification_chain, summary_chain, translation_chain
 
 text = """
-Artificial intelligence is a concept coined in the mid-1950s, following the reflections of mathematician Alan Turing, 
-who wondered whether a computer would one day be able to think, or if it was only capable of an imitation game.
+Artificial intelligence helps machines solve problems, analyze data,
+and support humans in tasks such as diagnosis, recommendation, and automation.
 """
 
-response = classification_chain.invoke({
-    "input": text,
-    "format_instructions": classification_parser.get_format_instructions()
-})
-print("Category:", response.category)
-print("Confidence:", response.confidence)
+print("\n--- Classification ---")
+classification = classification_chain.invoke({"input": text})
+print("Category:", classification.category)
+print("Confidence:", classification.confidence)
 
-from src.core.chains import summary_chain, translation_chain
-from src.core.parsers import summary_parser, translation_parser
-
-# Summary
 print("\n--- Summary ---")
-response = summary_chain.invoke({
-    "input": text,
-    "format_instructions": summary_parser.get_format_instructions()
-})
-print("Summary:", response.summary)
+summary = summary_chain.invoke({"input": text})
+print("Summary:", summary.summary)
 
-# Translation 
 print("\n--- Translation ---")
-response = translation_chain.invoke({
-    "input": text,
-    "format_instructions": translation_parser.get_format_instructions()
-})
-
-print("\nTranslated text:", response.translated_text)
+translation = translation_chain.invoke({"input": "Bonjour, comment allez-vous ?"})
+print("Translated text:", translation.translated_text)
