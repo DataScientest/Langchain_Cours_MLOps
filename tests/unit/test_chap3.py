@@ -48,7 +48,7 @@ def test_truncate_to_tokens():
 def test_read_pdf_excerpt_tool_is_bounded():
     excerpt = read_pdf_excerpt_tool.invoke({"path": "data/pdf/1.pdf"})
     assert excerpt.startswith("Intelligence artificielle")
-    assert count_tokens(excerpt) <= 3000
+    assert count_tokens(excerpt) <= 1500
     assert count_tokens(read_pdf_excerpt_tool.invoke({"path": "data/pdf/1.pdf", "max_tokens": 200})) <= 200
 
 
