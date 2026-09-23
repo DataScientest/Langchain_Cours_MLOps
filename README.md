@@ -2,64 +2,72 @@
 
 ## Version française
 
-Dans ce premier chapitre, nous avons posé les bases pour travailler avec LangChain et amorcer la construction d’un assistant intelligent.
+### Résumé Chapitre 1 : Composants fondamentaux
 
 1. Environnement de travail
-    - Mise en place d’une arborescence claire (src/, data/, etc.).
-    - Gestion des dépendances avec uv et configuration via pyproject.toml.
-    - Création d’un environnement reproductible et isolé.
+    - Arborescence claire (`src/`, `data/`, etc.).
+    - Dépendances gérées avec `uv` et `pyproject.toml` (LangChain 1.x, LangGraph 1.x).
 
-2. Composants fondamentaux de LangChain
-    - Utilisation de LiteLLM pour appeler différents modèles (Groq, GPT, Claude…) avec fallback automatique.
-    - Introduction aux Messages :
-        - **SystemMessage** (rôle du modèle),
-        - **HumanMessage** (demande utilisateur),
-        - **AIMessage** (réponse générée).
+2. Chat models
+    - `init_chat_model` crée le modèle à partir de la variable `CHAT_MODEL` du fichier `.env`.
+    - Changer de fournisseur revient à changer cette variable.
 
-3. Interface Runnable
-    - ``.invoke()`` : exécution simple.
-    - ``.batch()`` : exécution en parallèle.
-    - ``.stream()`` : génération en continu (streaming).
-    - ``.with_retry()`` : robustesse avec relance automatique.
+3. Messages
+    - **SystemMessage** (rôle du modèle), **HumanMessage** (demande), **AIMessage** (réponse).
 
-4. Création de Tools personnalisés
-    - Implémentation de ``word_count`` (compte de mots) et ``char_count`` (compte de caractères).
-    - Découverte du décorateur @tool pour exposer des fonctions au modèle.
+4. Tools
+    - `word_count` et `char_count`, créés avec le décorateur `@tool` (`langchain.tools`).
 
-5. Première application pratique
-    - Combinaison d’un modèle (ChatLiteLLM), de messages et de tools.
-    - Analyse des réponses du LLM avec nos outils personnalisés.
+5. Interface Runnable
+    - `.invoke()`, `.batch()`, `.stream()`.
 
-👉 En résumé, nous avons construit les fondations de LangChain : Messages, Runnables et Tools. Ces briques serviront de socle pour développer un assistant complet dans les chapitres suivants.
+## Lancer le projet et les tests
+
+```bash
+uv sync
+uv run pytest       # tests hors ligne, sans clé API (modèles factices)
+```
+
+Les tests `live` appellent le vrai modèle et sont désactivés par défaut :
+
+```bash
+RUN_LIVE=1 uv run pytest -m live
+```
+
+Le modèle se configure dans `.env` avec `CHAT_MODEL` (par défaut `groq:openai/gpt-oss-120b`).
 
 ## English version
 
-In this first chapter, we laid the foundations to work with LangChain and start building an intelligent assistant.
+### Summary Chapter 1: Fundamental components
 
-1. Environment setup
-    - Setting up a clear directory structure (src/, data/, etc.).
-    - Managing dependencies
-    - Creating a reproducible and isolated environment.
+1. Working environment
+    - Clear directory structure (`src/`, `data/`, etc.).
+    - Dependencies managed with `uv` and `pyproject.toml` (LangChain 1.x, LangGraph 1.x).
 
-2. Fundamental components of LangChain
-    - Using LiteLLM to call different models (Groq, GPT, Claude…) with automatic fallback.
-    - Introduction to Messages :
-        - **SystemMessage** (role of the model),
-        - **HumanMessage** (user request),
-        - **AIMessage** (generated response).
+2. Chat models
+    - `init_chat_model` builds the model from the `CHAT_MODEL` variable in `.env`.
+    - Switching provider means changing this variable.
 
-3. Runnable interface
-    - ``.invoke()`` : simple execution.
-    - ``.batch()`` : parallel execution.
-    - ``.stream()`` : continuous generation (streaming).
-    - ``.with_retry()`` : robustness with automatic retry.
+3. Messages
+    - **SystemMessage** (model role), **HumanMessage** (request), **AIMessage** (answer).
 
-4. Creating custom Tools
-    - Implementation of ``word_count`` (word count) and ``char_count`` (character count).
-    - Discovery of the @tool decorator to expose functions to the model.
+4. Tools
+    - `word_count` and `char_count`, created with the `@tool` decorator (`langchain.tools`).
 
-5. First practical application
-    - Combination of a model (ChatLiteLLM), messages and tools.
-    - Analysis of the LLM responses with our custom tools.
+5. Runnable interface
+    - `.invoke()`, `.batch()`, `.stream()`.
 
-👉 In short, we built the core building blocks of LangChain: Messages, Runnables, and Tools. These foundations will support the development of a complete assistant in the next chapters.
+## Run the project and the tests
+
+```bash
+uv sync
+uv run pytest       # offline tests, no API key needed (fake models)
+```
+
+`live` tests call the real model and are disabled by default:
+
+```bash
+RUN_LIVE=1 uv run pytest -m live
+```
+
+The model is set in `.env` with `CHAT_MODEL` (default: `groq:openai/gpt-oss-120b`).
