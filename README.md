@@ -1,59 +1,63 @@
 # Langchain_Cours_MLOps
 
-## Résumé Chapitre 2 : Prompt Engineering & Sorties Structurées
+## Version française
 
-Dans ce chapitre, nous avons enrichi notre assistant en passant de simples interactions texte à des prompts modulaires et des sorties fiables.
+### Résumé Chapitre 2 : Prompts et sorties structurées
 
-1. ChatPromptTemplate
-    - Construction de prompts modulaires, testables et réutilisables
-    - Utilisation des MessagesPlaceholder pour gérer dynamiquement du contenu comme l’historique
-    - Compatibilité directe avec LangGraph pour des workflows plus complexes
+1. `ChatPromptTemplate`
+    - Prompts réutilisables avec des variables (`{input}`), rangés dans `src/prompts/prompts.py`.
 
-2. Few-Shot Learning
-    - Introduction d’exemples concrets dans le prompt pour guider le modèle
-    - Amélioration de la précision et réduction des sorties vagues ou trop longues
+2. Few-shot learning
+    - Exemples `human` / `ai` dans le prompt de classification.
 
-3. Chains
-    - Composition de pipelines complets avec l’opérateur ``|``
-    - Exemple : ``classification_prompt | llm | parser``
-    - Simplification de l’orchestration **Prompt → LLM → Réponse**.
+3. Schémas Pydantic (`src/core/schemas.py`)
+    - `ClassificationResult`, `SummaryResult`, `TranslationResult`.
 
-4. Sorties structurées avec OutputParser
-    - Utilisation de ``PydanticOutputParser`` pour forcer un format JSON strict.
-    - Définition de classes comme **ClassificationResult**, **SummaryResult**, **TranslationResult**.
-    - Validation automatique des réponses du modèle avant intégration dans le pipeline.
+4. Chaînes (`src/core/chains.py`)
+    - `prompt | llm.with_structured_output(Schema)` : la sortie est directement un objet Pydantic valide.
 
-5. Applications pratiques
-    - Mise en place d’un système de classification, résumé et traduction automatique.
-    - Résultats directement exploitables en Python grâce aux objets validés.
+## Lancer le projet et les tests
 
-👉 À la fin de ce chapitre, nous avons un assistant capable de générer des réponses contrôlées, robustes et prêtes pour la production.
+```bash
+uv sync
+uv run pytest       # tests hors ligne, sans clé API (modèles factices)
+```
 
-## Summary Chapter 2: Prompt Engineering & Structured Outputs
+Les tests `live` appellent le vrai modèle et sont désactivés par défaut :
 
-In this chapter, we enhanced our assistant by moving from plain text interactions to modular prompts and reliable outputs.
+```bash
+RUN_LIVE=1 uv run pytest -m live
+```
 
-1. ChatPromptTemplate
-    - Build modular, testable, and reusable prompts.
-    - Use ``MessagesPlaceholder`` to dynamically insert content such as history.
-    - Compatibility with LangGraph for more complex workflows.
+Le modèle se configure dans `.env` avec `CHAT_MODEL` (par défaut `groq:openai/gpt-oss-120b`).
 
-2. Few-Shot Learning
-    - Introduce concrete examples in the prompt to guide the model.
-    - Improve precision and reduce vague or overly long outputs.
+## English version
 
-3. Chains
-    - Compose complex pipelines with the ``|`` operator.
-    - Example: ``classification_prompt | llm | parser``
-    - Simplify the **Prompt → LLM → Response** workflow.
+### Summary Chapter 2: Prompts and structured output
 
-4. Structured outputs with OutputParser
-    - Use ``PydanticOutputParser`` to enforce a strict JSON
-    - Define models such as **ClassificationResult**, **SummaryResult**, **TranslationResult**.
-    - Validate model responses before integrating them into the pipeline.
+1. `ChatPromptTemplate`
+    - Reusable prompts with variables (`{input}`), stored in `src/prompts/prompts.py`.
 
-5. Practical applications
-    - Implementation of classification, summarization, and translation pipelines.
-    - Results directly usable in Python with validated objects.
+2. Few-shot learning
+    - `human` / `ai` examples in the classification prompt.
 
-👉 At the end of this chapter, we have an assistant capable of generating controlled, reliable, and ready-to-go responses.
+3. Pydantic schemas (`src/core/schemas.py`)
+    - `ClassificationResult`, `SummaryResult`, `TranslationResult`.
+
+4. Chains (`src/core/chains.py`)
+    - `prompt | llm.with_structured_output(Schema)`: the output is directly a valid Pydantic object.
+
+## Run the project and the tests
+
+```bash
+uv sync
+uv run pytest       # offline tests, no API key needed (fake models)
+```
+
+`live` tests call the real model and are disabled by default:
+
+```bash
+RUN_LIVE=1 uv run pytest -m live
+```
+
+The model is set in `.env` with `CHAT_MODEL` (default: `groq:openai/gpt-oss-120b`).
