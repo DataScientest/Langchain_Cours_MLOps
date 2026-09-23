@@ -10,13 +10,13 @@ classification_prompt = ChatPromptTemplate.from_messages([
     ("human", "Texte : {input}")
 ])
 
-# Résumé
+# Summary
 summary_prompt = ChatPromptTemplate.from_messages([
     ("system", "Tu résumes un texte en conservant les idées essentielles."),
     ("human", "Texte : {input}")
 ])
 
-# Traduction
+# Translation
 translation_prompt = ChatPromptTemplate.from_messages([
     ("system", "Tu traduis du français vers l'anglais avec un style naturel."),
     ("human", "Texte : {input}")
