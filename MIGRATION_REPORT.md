@@ -85,6 +85,7 @@ Les modèles factices ne pouvaient pas les révéler. Ils ont été trouvés en 
 | Chap3 : `USER_AGENT` du `.env` jamais chargé (lu à l'import de `WebBaseLoader`) | `load_dotenv()` avant l'import dans `loaders.py` |
 | Chap5 : `LANGSMITH_TRACING=true` avec une clé placeholder → 403 à chaque trace | `.env` modèle en `false` + phrase dans le cours |
 | Chap5 : erreurs du fournisseur remontées en 500 ; fichier absent en 502 | `/agent` : 400 chemin vide, 404 fichier absent, 413/429 transmis, 502 sinon |
+| Chap6 (énoncé d'examen) : « chaîne de chat libre », alors que le cours construit la mémoire avec un agent | « Agent de chat libre » avec `create_agent` + `checkpointer` (FR/EN et README d'examen) |
 | Chap1/5 : limites du compte gratuit et message utilisateur conservé après un `/chat` en échec, non documentés | Notes ajoutées au cours ; commande `uvicorn` de repli `--port 8001` |
 
 Les docstrings du nouveau code et du code de test sont en anglais. Le code recopié du cours FR garde ses docstrings françaises d'origine (voir points non résolus).
@@ -156,7 +157,6 @@ Deux cas ne sont pas vérifiables par ce harnais et sont couverts par les tests 
 
 - Relance des tests live sur Groq avec le code final : en attente du quota journalier.
 - Le code recopié du cours FR a des docstrings en français (convention : code en anglais). À traiter dans le cours si souhaité.
-- Écarts entre l'énoncé d'examen et les chapitres 1 à 5 (relevés par l'apprenant, antérieurs à cette migration) : authentification entre deux services, Docker/Compose/Makefile, historique des endpoints non-chat, pipeline conditionnel `/full_pipeline`, « chaîne de chat libre » au lieu d'un agent avec checkpointer.
 
 - `langchain-community` est archivé depuis juin 2026 et émet un `DeprecationWarning` à l'import. Aucun package officiel ne reprend `PyPDFLoader`, `TextLoader` ni `WebBaseLoader`. Le seul partenaire PDF léger, `langchain-pymupdf4llm`, a été testé et écarté : sortie bruitée, lenteur, licence AGPL, Tesseract requis. Il reste épinglé en 0.4.2 (choix validé) ; à réévaluer si LangChain publie un remplaçant.
 - Tests live non exécutés, faute de clé Groq valide.
