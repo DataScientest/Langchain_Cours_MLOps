@@ -1,59 +1,65 @@
 # Langchain_Cours_MLOps
 
-## Résumé Chapitre 5 : Intégration & Transition LangGraph
+## Version française
 
-Dans ce chapitre, nous avons franchi une étape clé en transformant notre prototype en une application complète, multi-utilisateurs et supervisée.
+### Résumé Chapitre 5 : Intégration, agents modernes et observabilité
 
-1. Mise en place d’un agent documentaire
-    - Un agent capable d’orchestrer nos outils (load_pdf, clean_text, split_texts, search_keyword, etc.).
-    - Définition stricte de ses capacités et de ses règles via un prompt dédié.
-    - Approche classique avec ZERO_SHOT_REACT_DESCRIPTION, en prévision d’une    transition future vers LangGraph.
+1. Agent documentaire (`src/agents/doc_agent.py`)
+    - `create_agent` avec les tools `load_pdf_tool` et `clean_text_tool`.
+    - `chat_agent` : agent de conversation avec `InMemorySaver`.
 
-2. Déploiement via API FastAPI
-    - Création d’une API regroupant toutes les fonctionnalités (résumé, classification, traduction, agent, chat).
-    - Gestion multi-utilisateurs avec un système de sessions persistantes (cookies).
-    - Endpoints clairs pour interagir avec l’assistant documentaire.
+2. API FastAPI (`src/api/main.py`)
+    - `/summary`, `/translate`, `/agent`, `/chat` (mémoire par `session_id`), `/history`.
+    - Erreurs explicites avec `HTTPException`.
 
-3. Interface utilisateur avec Streamlit
-    - Upload de documents (PDF, TXT, Markdown).
-    - Accès simple aux fonctionnalités via des onglets : résumé, classification, traduction, agent documentaire, mémoire, chat libre.
-    - Historique de session affiché directement dans l’interface.
+3. Observabilité avec LangSmith
+    - Variables `LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` dans `.env`.
 
-4. Monitoring avec LangSmith
-    - Suivi en temps réel des entrées, sorties, latences, tokens consommés.
-    - Visualisation des exécutions et des chaînes utilisées.
-    - Comparaison de prompts et suivi de leurs performances.
+Lancer l'API : `make api` puis ouvrir `http://127.0.0.1:8000/docs`.
 
-👉 Ce chapitre marque la transition vers la production :
-- Notre assistant est désormais accessible par API et interface graphique.
-- Le monitoring assure transparence et amélioration continue.
-- Prochaine étape : la migration vers LangGraph, pour une gestion des workflows encore plus robuste.
+## Lancer le projet et les tests
 
-## Summary Chapter 5: Integration & LangGraph Transition
+```bash
+uv sync
+uv run pytest       # tests hors ligne, sans clé API (modèles factices)
+```
 
-In this chapter, we took a major step by turning our prototype into a complete, multi-user, and monitored application.
+Les tests `live` appellent le vrai modèle et sont désactivés par défaut :
 
-1. Setting up a documentary agent
-    - An agent capable of orchestrating our tools (load_pdf, clean_text, split_texts, search_keyword, etc.).
-    - Strict definition of its capabilities and rules via a dedicated prompt.
-    - Classic approach with ZERO_SHOT_REACT_DESCRIPTION, for a future transition to LangGraph.
-    
-2. Deployment via FastAPI
-    - Creation of an API regrouping all the functionalities (summary, classification, translation, agent, chat).
-    - Multi-user management with persistent session management (cookies).
-    - Clear endpoints for interacting with the documentary assistant.
+```bash
+RUN_LIVE=1 uv run pytest -m live
+```
 
-3. User interface with Streamlit
-    - Upload of documents (PDF, TXT, Markdown).
-    - Access simple to the functionalities via tabs: summary, classification, translation, documentary agent, memory, free chat.
-    - Direct session history displayed in the interface.
-    
-4. Monitoring with LangSmith
-    - Real-time tracking of inputs, outputs, latencies, tokens consumed.
-    - Visualization of executions and used chains.
-    - Comparison of prompts and their performance.
-    
-👉 This chapter marks the transition to production:
-- Our documentary assistant is now accessible via API and graphical interface.
-- Monitoring ensures transparency and continuous improvement.
-- Next step: migration to LangGraph, for a more robust workflow management.
+Le modèle se configure dans `.env` avec `CHAT_MODEL` (par défaut `groq:openai/gpt-oss-120b`).
+
+## English version
+
+### Summary Chapter 5: Integration, modern agents and observability
+
+1. Document agent (`src/agents/doc_agent.py`)
+    - `create_agent` with the `load_pdf_tool` and `clean_text_tool` tools.
+    - `chat_agent`: conversational agent with `InMemorySaver`.
+
+2. FastAPI API (`src/api/main.py`)
+    - `/summary`, `/translate`, `/agent`, `/chat` (memory per `session_id`), `/history`.
+    - Explicit errors with `HTTPException`.
+
+3. Observability with LangSmith
+    - `LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` variables in `.env`.
+
+Start the API: `make api`, then open `http://127.0.0.1:8000/docs`.
+
+## Run the project and the tests
+
+```bash
+uv sync
+uv run pytest       # offline tests, no API key needed (fake models)
+```
+
+`live` tests call the real model and are disabled by default:
+
+```bash
+RUN_LIVE=1 uv run pytest -m live
+```
+
+The model is set in `.env` with `CHAT_MODEL` (default: `groq:openai/gpt-oss-120b`).

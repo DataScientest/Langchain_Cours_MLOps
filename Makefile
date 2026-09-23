@@ -1,6 +1,5 @@
-api: 
-	uvicorn src.api.main:app --reload
+api:
+	uv run uvicorn src.api.main:app --reload
 
-streamlit: 
-	streamlit run src/app.py
-
+test:
+	uv run pytest
