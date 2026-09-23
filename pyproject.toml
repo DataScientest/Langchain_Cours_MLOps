@@ -24,7 +24,7 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-m 'not live'"
-markers = ["live: appelle un vrai modèle (RUN_LIVE=1 et clé API requis)"]
+markers = ["live: calls a real model (requires RUN_LIVE=1 and an API key)"]
 filterwarnings = [
     "error::DeprecationWarning:src.*",
     "ignore:`langchain-community` is being sunset:DeprecationWarning",

@@ -8,15 +8,15 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-# Tests live : RUN_LIVE=1 uv run pytest -m live (nécessite GROQ_API_KEY valide).
+# Live tests: RUN_LIVE=1 uv run pytest -m live (requires a valid GROQ_API_KEY).
 RUN_LIVE = os.getenv("RUN_LIVE") == "1"
 
-# Pas de traçage LangSmith pendant les tests (doit précéder le load_dotenv du code).
+# No LangSmith tracing during tests (must run before the code calls load_dotenv).
 os.environ["LANGSMITH_TRACING"] = "false"
 
 if not RUN_LIVE:
-    # Sans clé réelle : tout appel à init_chat_model (direct ou via create_agent)
-    # renvoie un modèle factice. Doit être fait avant d'importer src.*.
+    # Without a real key, every init_chat_model call (direct or through create_agent)
+    # returns a fake model. Must happen before any src.* import.
     import langchain.agents.factory
     import langchain.chat_models
 
@@ -35,7 +35,7 @@ def _run_from_repo_root(monkeypatch):
 def pytest_collection_modifyitems(config, items):
     if RUN_LIVE:
         return
-    skip_live = pytest.mark.skip(reason="test live : lancer avec RUN_LIVE=1 et une vraie clé API")
+    skip_live = pytest.mark.skip(reason="live test: run with RUN_LIVE=1 and a real API key")
     for item in items:
         if "live" in item.keywords:
             item.add_marker(skip_live)
