@@ -1,3 +1,8 @@
+from dotenv import load_dotenv
+
+# Load .env first: WebBaseLoader reads USER_AGENT when it is imported.
+load_dotenv()
+
 from langchain_community.document_loaders import PyPDFLoader, TextLoader, WebBaseLoader
 
 def load_pdf(path: str):
