@@ -41,6 +41,7 @@ Les dépendances du `pyproject.toml` de chaque branche sont celles qu'obtient un
 Les branches ajoutent seulement un groupe `[dependency-groups] dev` (pytest, httpx) et la section `[tool.pytest.ini_options]`, absents du cours.
 
 Modèle : `CHAT_MODEL=groq:openai/gpt-oss-120b` (remplaçant recommandé par Groq ; tools et JSON Schema supportés). Il se change dans `.env` sans toucher au code.
+Limites constatées sur un compte Groq gratuit : 8 000 tokens par minute et 200 000 tokens par jour, **par organisation** (deux clés d'un même compte partagent le quota).
 
 ## Branches et fichiers
 
@@ -72,6 +73,22 @@ Modèle : `CHAT_MODEL=groq:openai/gpt-oss-120b` (remplaçant recommandé par Gro
 
 Pas d'embeddings dans ce module : le RAG du chap3 est présenté comme concept, sans code. Le point `text-embedding-ada-002` ne s'applique donc pas.
 
+## Correctifs issus des tests avec le vrai modèle
+
+Les modèles factices ne pouvaient pas les révéler. Ils ont été trouvés en exécutant le cours contre `groq:openai/gpt-oss-120b`, puis confirmés par l'apprenant simulé.
+
+| Problème | Correctif (cours FR/EN + branches) |
+|---|---|
+| Chap2 : `with_structured_output` par défaut (function calling) échoue 4 fois sur 5 (`tool_use_failed`) avec le prompt few-shot | `method="json_schema"` : 15/15 |
+| Chap5 : l'agent envoie tout le PDF au modèle (≈ 8 700 tokens), HTTP 413 en compte gratuit | `truncate_to_tokens` (`src/utils/token.py`) + `read_pdf_excerpt_tool` (`src/documents/tools.py`), extrait nettoyé borné à 1 500 tokens ; l'agent n'a plus que ce tool |
+| Chap5 : `response_format=DocAnswer` → HTTP 400 (Groq refuse le mode JSON natif combiné à des tools) | `ToolStrategy(DocAnswer)` |
+| Chap3 : `USER_AGENT` du `.env` jamais chargé (lu à l'import de `WebBaseLoader`) | `load_dotenv()` avant l'import dans `loaders.py` |
+| Chap5 : `LANGSMITH_TRACING=true` avec une clé placeholder → 403 à chaque trace | `.env` modèle en `false` + phrase dans le cours |
+| Chap5 : erreurs du fournisseur remontées en 500 ; fichier absent en 502 | `/agent` : 400 chemin vide, 404 fichier absent, 413/429 transmis, 502 sinon |
+| Chap1/5 : limites du compte gratuit et message utilisateur conservé après un `/chat` en échec, non documentés | Notes ajoutées au cours ; commande `uvicorn` de repli `--port 8001` |
+
+Les docstrings du nouveau code et du code de test sont en anglais. Le code recopié du cours FR garde ses docstrings françaises d'origine (voir points non résolus).
+
 ## Bugs corrigés au passage
 
 - chap2 (ancien code) : le script envoyait `"texte"` à des prompts qui attendent `{input}`.
@@ -84,11 +101,11 @@ Pas d'embeddings dans ce module : le RAG du chap3 est présenté comme concept, 
 
 | Branche | Résultat |
 |---|---|
-| chap1 | 17 passed, 3 deselected (live) |
-| chap2 | 20 passed, 3 deselected |
-| chap3 | 24 passed, 3 deselected |
-| chap4 | 26 passed, 3 deselected |
-| chap5 | 31 passed, 3 deselected |
+| chap1 | 17 passed, 7 deselected (live) |
+| chap2 | 20 passed, 7 deselected |
+| chap3 | 26 passed, 7 deselected |
+| chap4 | 28 passed, 7 deselected |
+| chap5 | 38 passed, 7 deselected |
 
 Couverture :
 - imports ;
@@ -102,7 +119,21 @@ Couverture :
 
 Aucun `DeprecationWarning` hors celui de `langchain-community` (voir plus bas), vérifié avec `-W error::DeprecationWarning`.
 
-Tests live : `RUN_LIVE=1 uv run pytest -m live` (clé Groq requise). **Non exécutés** : aucune clé valide n'était disponible.
+Tests live (`RUN_LIVE=1 uv run pytest -m live`, 7 tests : modèle, 3 × chaînes structurées, agent documentaire sur `1.pdf`, `ToolStrategy`, mémoire) :
+- `groq:openai/gpt-oss-120b` : 7/7 sur le code avant les derniers ajouts (extrait à 1 500 tokens, gestion d'erreurs) ; relance sur le code final **en attente** du quota journalier Groq ;
+- `openai:gpt-5.4-mini` via la gateway Liora : 7/7 sur le code final.
+
+## Test de bout en bout (apprenant simulé)
+
+Un agent Codex a joué un apprenant : dépôt neuf, cours FR lu dans l'ordre, chaque fichier recopié, chaque commande exécutée, exercices tentés puis comparés à la solution, API testée avec `curl`.
+
+| Passage | Cours | Modèle | OK | KO | Ambigu |
+|---|---|---|---:|---:|---:|
+| 1 | avant correctifs | `groq:openai/gpt-oss-120b` | 16 | 5 | 1 |
+| 2 | après correctifs | `openai:gpt-5.4-mini` (gateway Liora, quota Groq épuisé) | 26 | 0 | 2 |
+
+Les 2 points ambigus du 2e passage (fichier absent en 502, port 8000 occupé) sont corrigés depuis.
+Un passage complet avec relances a consommé presque tout le quota journalier d'un compte Groq gratuit.
 
 `scripts/check_versions.sh` : OK sur les 5 branches de travail + `exam_Langchain/pyproject.toml` (27 paquets). Il échoue, comme attendu, sur les anciennes branches `origin/chapN`.
 Après merge : `scripts/check_versions.sh` ; avant merge : `REFS="feature/no-ref/migrate-langchain-v1-chap1 …" scripts/check_versions.sh`.
@@ -122,6 +153,10 @@ Deux cas ne sont pas vérifiables par ce harnais et sont couverts par les tests 
 - la variante de `/agent` avec `HTTPException`, qui remplace la première : `test_agent_endpoint_rejects_empty_path`.
 
 ## Points non résolus
+
+- Relance des tests live sur Groq avec le code final : en attente du quota journalier.
+- Le code recopié du cours FR a des docstrings en français (convention : code en anglais). À traiter dans le cours si souhaité.
+- Écarts entre l'énoncé d'examen et les chapitres 1 à 5 (relevés par l'apprenant, antérieurs à cette migration) : authentification entre deux services, Docker/Compose/Makefile, historique des endpoints non-chat, pipeline conditionnel `/full_pipeline`, « chaîne de chat libre » au lieu d'un agent avec checkpointer.
 
 - `langchain-community` est archivé depuis juin 2026 et émet un `DeprecationWarning` à l'import. Aucun package officiel ne reprend `PyPDFLoader`, `TextLoader` ni `WebBaseLoader`. Le seul partenaire PDF léger, `langchain-pymupdf4llm`, a été testé et écarté : sortie bruitée, lenteur, licence AGPL, Tesseract requis. Il reste épinglé en 0.4.2 (choix validé) ; à réévaluer si LangChain publie un remplaçant.
 - Tests live non exécutés, faute de clé Groq valide.
