@@ -1,12 +1,13 @@
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_community.document_loaders import PyPDFLoader, TextLoader, WebBaseLoader
 
 def load_pdf(path: str):
-    loader = PyPDFLoader(path)
-    return loader.load()
+    """Charge un PDF et renvoie une liste de Documents."""
+    return PyPDFLoader(path).load()
 
-def load_txt(path: str, encoding: str = "utf-8"):
-    loader = TextLoader(path, encoding=encoding)
-    return loader.load()
+def load_txt(path: str):
+    """Charge un fichier texte."""
+    return TextLoader(path, encoding="utf-8").load()
 
-def load_markdown(path: str, encoding: str = "utf-8"):
-    return load_txt(path, encoding=encoding)
+def load_web(url: str):
+    """Charge le contenu d'une page web."""
+    return WebBaseLoader(url).load()

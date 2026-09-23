@@ -1,23 +1,12 @@
-import re
 from typing import List
 from langchain_core.documents import Document
 
 def keyword_search(docs: List[Document], query: str, k: int = 3) -> List[str]:
-    """
-    Recherche simple par mots-clés dans une liste de Documents.
-    Retourne jusqu'à k extraits contenant la requête.
-    """
-    results = []
+    matches = []
     query_lower = query.lower()
 
     for doc in docs:
-        text = doc.page_content
-        if query_lower in text.lower():
-            match = re.search(query, text, re.IGNORECASE)
-            if match:
-                start = max(0, match.start() - 150)
-                end = min(len(text), match.end() + 150)
-                snippet = text[start:end]
-                results.append(snippet)
+        if query_lower in doc.page_content.lower():
+            matches.append(doc.page_content[:500])
 
-    return results[:k] if results else ["Aucun résultat trouvé."]
+    return matches[:k]
