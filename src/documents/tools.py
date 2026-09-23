@@ -6,22 +6,22 @@ from src.utils.token import count_tokens, truncate_to_tokens
 
 @tool
 def load_pdf_tool(path: str):
-    """Charge un PDF et renvoie les documents extraits."""
+    """Loads a PDF and returns the extracted documents."""
     return load_pdf(path)
 
 @tool
 def clean_text_tool(text: str) -> str:
-    """Nettoie un texte brut avant analyse."""
+    """Cleans raw text before analysis."""
     return clean_text(text)
 
 @tool
 def count_tokens_tool(text: str) -> int:
-    """Compte le nombre de tokens d'un texte."""
+    """Counts the number of tokens in a text."""
     return count_tokens(text)
 
 @tool
 def search_keyword_tool(chunks: list, query: str, k: int = 3) -> list:
-    """Recherche un mot-clé dans une liste de chunks."""
+    """Searches for a keyword in a list of chunks."""
     return keyword_search(chunks, query, k=k)
 
 @tool
