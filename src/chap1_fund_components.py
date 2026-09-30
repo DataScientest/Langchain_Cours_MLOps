@@ -2,49 +2,41 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from src.core.llm import llm
 from src.core.tools import word_count, char_count
 
-print("\n=== Chapitre 1 : Composants Fondamentaux ===\n")
+print("\n=== Chapitre 1 : Composants fondamentaux ===\n")
 
-# 1. Préparer les messages (System + Human)
-human_prompt = "Explique en une phrase ce qu'est LangChain."
+print("--- INVOKE ---")
+response = llm.invoke([
+    SystemMessage(content="Tu es un assistant expert en MLOps."),
+    HumanMessage(content="Explique en quoi LangChain aide à structurer une application LLM.")
+])
+print(response.content)
 
-messages = [
-    SystemMessage(content="Tu es un Assistant Intelligent de Documents."),
-    HumanMessage(content=human_prompt)
-]
+print("\n--- ANALYSE DE LA RÉPONSE ---")
+print("Nombre de mots      :", word_count.invoke(response.content))
+print("Nombre de caractères :", char_count.invoke(response.content))
 
-print("--- Messages ---")
-print("SystemMessage :", messages[0].content)
-print("HumanMessage  :", messages[1].content)
-
-# 2. Utiliser directement le Runnable (llm) avec .invoke
-print("\n--- Runnable .invoke ---")
-response = llm.invoke(messages)
-response_text = response.content
-print("AIMessage     :", response_text)
-
-# 3. Passer la réponse de l'IA dans nos outils
-print("\n--- Analyse avec Tools ---")
-print("Texte généré par l'IA :", response_text)
-print("Nb de mots            :", word_count.invoke(response_text))
-print("Nb de caractères      :", char_count.invoke(response_text))
-
-# 4. Montrer .batch avec plusieurs prompts
-print("\n--- Runnable .batch ---")
+print("\n--- BATCH ---")
 batch_inputs = [
-    [HumanMessage(content="Donne-moi un synonyme de 'rapide'.")],
-    [HumanMessage(content="Donne-moi un synonyme de 'heureux'.")]
+    [
+        SystemMessage(content="Tu es un assistant de synonymes."),
+        HumanMessage(content="Donne un synonyme de rapide.")
+    ],
+    [
+        SystemMessage(content="Tu es un assistant scientifique."),
+        HumanMessage(content="Explique ce qu'est un neurone artificiel.")
+    ]
 ]
+
 batch_outputs = llm.batch(batch_inputs)
-print("Batch outputs :", [r.content for r in batch_outputs])
+for i, r in enumerate(batch_outputs, 1):
+    print(f"\nRéponse {i} :", r.content)
 
-# 5. Streaming (génération progressive)
-print("\n--- Runnable .stream ---")
-for chunk in llm.stream([HumanMessage(content="Écris un poème sur les modèles de langage.")]):
+print("\n--- STREAMING ---")
+stream_text = ""
+for chunk in llm.stream("Rédige un court paragraphe sur les usages des agents IA."):
     print(chunk.content, end="", flush=True)
-print("\n--- End of stream ---")
+    stream_text += chunk.content
 
-# 6. Retry automatique en cas d'échec
-print("\n--- Runnable .with_retry ---")
-safe_llm = llm.with_retry()
-retry_response = safe_llm.invoke([HumanMessage(content="Dis 'Bonjour' après un retry.")])
-print("Retry output  :", retry_response.content)
+print("\n\nAnalyse du texte généré en streaming :")
+print("Nombre de mots      :", word_count.invoke(stream_text))
+print("Nombre de caractères :", char_count.invoke(stream_text))
