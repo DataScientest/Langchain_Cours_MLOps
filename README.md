@@ -1,98 +1,92 @@
 # Langchain_Cours_MLOps
 ## Version française
 
-Ce dépôt contient l’ensemble du code et des ressources nécessaires pour suivre le cours sur LangChain & MLOps.
-Vous y trouverez :
+Ce dépôt contient la structure de projet du cours LangChain & MLOps (LangChain 1.x, LangGraph 1.x).
+Les fichiers sont volontairement vides : vous les complétez au fil des chapitres.
 
 ```txt
 .
+├── .env                          # Clés API et CHAT_MODEL (chapitre 1)
 ├── Makefile
 ├── README.md
-├── pyproject.toml
+├── pyproject.toml                # Dépendances (chapitre 1)
 ├── data
-│   ├── md
-│   ├── pdf
-│   │   ├── 1.pdf
-│   │   ├── 2.pdf
-│   │   └── 3.pdf
-│   └── txt
+│   └── pdf
+│       ├── 1.pdf
+│       ├── 2.pdf
+│       └── 3.pdf
 └── src
-    ├── app.py                  # Point d’entrée de l’application
     ├── chap1_fund_components.py  # Chapitre 1 : composants fondamentaux
-    ├── chap2_prompt_output.py    # Chapitre 2 : prompts & output parsers
-    ├── chap3_docs.py             # Chapitre 3 : gestion des documents
-    ├── chap4_memory.py           # Chapitre 4 : gestion de la mémoire
+    ├── chap2_prompt_output.py    # Chapitre 2 : prompts & sorties structurées
+    ├── chap3_docs.py             # Chapitre 3 : traitement de documents
+    ├── chap4_memory.py           # Chapitre 4 : état et mémoire
     ├── agents
-    │   └── doc_agent.py        # Agent documentaire
+    │   └── doc_agent.py          # Agents create_agent (chapitre 5)
     ├── api
-    │   └── main.py             # API FastAPI (analyse, tests, chat, etc.)
+    │   └── main.py               # API FastAPI (chapitre 5)
     ├── core
-    │   ├── chains.py           # Chaînes LangChain (analyse, test, chat…)
-    │   ├── llm.py              # Configuration du modèle LLM
-    │   ├── parsers.py          # Output parsers structurés
-    │   └── tools.py            # Outils génériques
+    │   ├── chains.py             # Chaînes prompt | llm.with_structured_output(...)
+    │   ├── llm.py                # Modèle (init_chat_model)
+    │   ├── schemas.py            # Schémas Pydantic
+    │   └── tools.py              # Tools @tool
     ├── documents
-    │   ├── cleaners.py         # Nettoyage des documents
-    │   ├── loaders.py          # Chargement des documents
-    │   ├── search.py           # Recherche dans les documents
-    │   ├── splitters.py        # Découpage en chunks
-    │   └── tools.py            # Outils spécifiques aux documents
+    │   ├── cleaners.py           # Nettoyage des documents
+    │   ├── loaders.py            # Chargement des documents
+    │   ├── search.py             # Recherche par mot-clé
+    │   ├── splitters.py          # Découpage en chunks
+    │   └── tools.py              # Tools documentaires
     ├── memory
-    │   ├── memory.py           # Gestion mémoire / historique
-    │   └── session.py          # Sessions multi-utilisateurs
+    │   └── session.py            # checkpointer + thread_id
     ├── prompts
-    │   └── prompts.py          # Prompts structurés
+    │   └── prompts.py            # ChatPromptTemplate
     └── utils
-        └── token.py            # Gestion des tokens
+        └── token.py              # Comptage des tokens
 ```
 
-👉 Important : les fichiers de ce dépôt sont une base. Ils sont destinés à être modifiés, enrichis et adaptés au fur et à mesure que vous progressez dans le cours. Chaque chapitre introduit de nouvelles fonctionnalités que vous implémenterez directement dans ces fichiers.
+👉 Chaque branche `chap1` à `chap5` contient la correction du chapitre correspondant, avec une suite de tests (`uv run pytest`) qui tourne sans clé API.
 
 ## English version
 
-This repository contains all the code and resources needed to follow the LangChain & MLOps course.
-You will find:
+This repository contains the project structure of the LangChain & MLOps course (LangChain 1.x, LangGraph 1.x).
+The files are intentionally empty: you fill them in chapter after chapter.
 
 ```txt
 .
+├── .env                          # API keys and CHAT_MODEL (chapter 1)
 ├── Makefile
 ├── README.md
-├── pyproject.toml
+├── pyproject.toml                # Dependencies (chapter 1)
 ├── data
-│   ├── md
-│   ├── pdf
-│   │   ├── 1.pdf
-│   │   ├── 2.pdf
-│   │   └── 3.pdf
-│   └── txt
+│   └── pdf
+│       ├── 1.pdf
+│       ├── 2.pdf
+│       └── 3.pdf
 └── src
-    ├── app.py                  # Application entry point
     ├── chap1_fund_components.py  # Chapter 1: fundamental components
-    ├── chap2_prompt_output.py    # Chapter 2: prompts & output parsers
-    ├── chap3_docs.py             # Chapter 3: document management
-    ├── chap4_memory.py           # Chapter 4: memory management
+    ├── chap2_prompt_output.py    # Chapter 2: prompts & structured output
+    ├── chap3_docs.py             # Chapter 3: document processing
+    ├── chap4_memory.py           # Chapter 4: state and memory
     ├── agents
-    │   └── doc_agent.py        # Documentation agent
+    │   └── doc_agent.py          # create_agent agents (chapter 5)
     ├── api
-    │   └── main.py             # FastAPI backend (analysis, tests, chat, etc.)
+    │   └── main.py               # FastAPI API (chapter 5)
     ├── core
-    │   ├── chains.py           # LangChain chains (analysis, test, chat…)
-    │   ├── llm.py              # LLM model configuration
-    │   ├── parsers.py          # Structured output parsers
-    │   └── tools.py            # General utilities
+    │   ├── chains.py             # prompt | llm.with_structured_output(...) chains
+    │   ├── llm.py                # Model (init_chat_model)
+    │   ├── schemas.py            # Pydantic schemas
+    │   └── tools.py              # @tool tools
     ├── documents
-    │   ├── cleaners.py         # Document cleaning
-    │   ├── loaders.py          # Document loading
-    │   ├── search.py           # Document search
-    │   ├── splitters.py        # Splitting into chunks
-    │   └── tools.py            # Document-specific tools
+    │   ├── cleaners.py           # Document cleaning
+    │   ├── loaders.py            # Document loading
+    │   ├── search.py             # Keyword search
+    │   ├── splitters.py          # Chunk splitting
+    │   └── tools.py              # Document tools
     ├── memory
-    │   ├── memory.py           # Memory / history management
-    │   └── session.py          # Multi-user session management
+    │   └── session.py            # checkpointer + thread_id
     ├── prompts
-    │   └── prompts.py          # Structured prompts
+    │   └── prompts.py            # ChatPromptTemplate
     └── utils
-        └── token.py            # Token management
+        └── token.py              # Token counting
 ```
 
-👉 **Important**: the files in this repository are a starting point. They are meant to be modified, expanded, and adapted as you progress through the course. Each chapter introduces new features that you will implement directly in these files.
+👉 Branches `chap1` to `chap5` hold the solution of each chapter, with a test suite (`uv run pytest`) that runs without any API key.
