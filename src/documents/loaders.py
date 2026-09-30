@@ -1,20 +1,18 @@
-from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader, TextLoader
+from dotenv import load_dotenv
+
+# Load .env first: WebBaseLoader reads USER_AGENT when it is imported.
+load_dotenv()
+
+from langchain_community.document_loaders import PyPDFLoader, TextLoader, WebBaseLoader
 
 def load_pdf(path: str):
-    """Load a PDF and return a list of Documents (one per page)."""
-    loader = PyPDFLoader(path)
-    return loader.load()
+    """Loads a PDF and returns a list of Documents."""
+    return PyPDFLoader(path).load()
+
+def load_txt(path: str):
+    """Loads a text file."""
+    return TextLoader(path, encoding="utf-8").load()
 
 def load_web(url: str):
-    """Load the content of a web page."""
-    loader = WebBaseLoader(url)
-    return loader.load()
-
-def load_txt(path: str, encoding: str = "utf-8"):
-    """Load a plain text file (.txt)."""
-    loader = TextLoader(path, encoding=encoding)
-    return loader.load()
-
-def load_markdown(path: str, encoding: str = "utf-8"):
-    """Load a Markdown file (.md)."""
-    return load_txt(path, encoding=encoding)
+    """Loads the content of a web page."""
+    return WebBaseLoader(url).load()
