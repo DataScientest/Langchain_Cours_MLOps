@@ -1,65 +1,36 @@
 import os
-from langchain_core.chat_history import InMemoryChatMessageHistory
-from langchain_community.chat_message_histories import FileChatMessageHistory, SQLChatMessageHistory
-from src.memory.memory import SummarizedHistoryWrapper  
+from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langgraph.checkpoint.memory import InMemorySaver
 
-class SessionManager:
-    def __init__(self, memory_type="inmemory", storage_path="sessions.db", token_limit=500):
-        self.memory_type = memory_type
-        self.storage_path = storage_path
-        self.token_limit = token_limit
-        os.makedirs("session_history", exist_ok=True)
+load_dotenv()
 
-    def create_session(self, user_id: str):
-        """Return the history corresponding to the user, wrapped with the summarized wrapper"""
-        if self.memory_type == "inmemory":
-            base_history = InMemoryChatMessageHistory()
-        elif self.memory_type == "file":
-            base_history = FileChatMessageHistory(f"session_history/{user_id}.json")
-        elif self.memory_type == "sql":
-            base_history = SQLChatMessageHistory(
-                session_id=user_id,
-                connection_string=f"sqlite:///{self.storage_path}"
-            )
-        else:
-            raise ValueError("Unknown memory type")
+checkpointer = InMemorySaver()
 
-        return SummarizedHistoryWrapper(base_history, token_limit=self.token_limit)
+agent = create_agent(
+    model=os.getenv("CHAT_MODEL", "groq:openai/gpt-oss-120b"),
+    tools=[],
+    system_prompt="Tu es un assistant pédagogique.",
+    checkpointer=checkpointer,
+)
 
-    def reset_session(self, user_id: str):
-        """Reset the session by clearing the history"""
-        if self.memory_type == "inmemory":
-            base_history = InMemoryChatMessageHistory()
-        elif self.memory_type == "file":
-            filepath = f"session_history/{user_id}.json"
-            if os.path.exists(filepath):
-                os.remove(filepath)
-            base_history = FileChatMessageHistory(filepath)
-        elif self.memory_type == "sql":
-            base_history = SQLChatMessageHistory(
-                session_id=user_id,
-                connection_string=f"sqlite:///{self.storage_path}"
-            )
-        else:
-            raise ValueError("Unknown memory type")
+config = {"configurable": {"thread_id": "alice"}}
 
-        return SummarizedHistoryWrapper(base_history, token_limit=self.token_limit)
+response = agent.invoke(
+    {"messages": [{"role": "user", "content": "Bonjour, je m'appelle Alice."}]},
+    config=config,
+)
 
-    def delete_session(self, user_id: str):
-        """Completely delete the session"""
-        if self.memory_type == "inmemory":
-            return None
-        elif self.memory_type == "file":
-            filepath = f"session_history/{user_id}.json"
-            if os.path.exists(filepath):
-                os.remove(filepath)
-            return f"Session {user_id} deleted (file removed)"
-        elif self.memory_type == "sql":
-            return f"Manual deletion required for {user_id} in database {self.storage_path}"
-        else:
-            raise ValueError("Unknown memory type")
+print(response["messages"][-1].content)
 
-    def read_session(self, user_id: str):
-        """Retourne l’historique (brut ou résumé) pour un utilisateur"""
-        memory = self.create_session(user_id)
-        return [{"type": msg.type, "content": msg.content} for msg in memory.messages]
+agent.invoke(
+    {"messages": [{"role": "user", "content": "J'étudie la médecine."}]},
+    config=config,
+)
+
+result = agent.invoke(
+    {"messages": [{"role": "user", "content": "Quel est mon domaine d'étude ?"}]},
+    config=config,
+)
+
+print(result["messages"][-1].content)
