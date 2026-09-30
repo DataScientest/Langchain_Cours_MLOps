@@ -1,4 +1,4 @@
-from langchain.agents import tool
+from langchain.tools import tool
 
 @tool
 def word_count(text: str) -> int:
