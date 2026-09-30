@@ -1,14 +1,11 @@
 import os
-from langchain_litellm import ChatLiteLLM
+from dotenv import load_dotenv
+from langchain.chat_models import init_chat_model
+
+load_dotenv()
 
 def get_llm():
-    api_key = os.getenv("GROQ_API_KEY")
-    model = os.getenv("LITELLM_MODEL", "groq/llama-3.3-70b-versatile")
-    fallback_model = os.getenv("FALLBACK_MODEL", "groq/llama-3-8b-instant")
-
-    try:
-        return ChatLiteLLM(model=model, api_key=api_key)     
-    except Exception:
-        return ChatLiteLLM(model=fallback_model, api_key=api_key)
+    model_name = os.getenv("CHAT_MODEL", "groq:openai/gpt-oss-120b")
+    return init_chat_model(model_name)
 
 llm = get_llm()

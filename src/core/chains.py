@@ -1,20 +1,15 @@
-from .llm import llm
+from src.core.llm import llm
+from src.core.schemas import (
+    ClassificationResult,
+    SummaryResult,
+    TranslationResult,
+)
 from src.prompts.prompts import (
-    summary_prompt,
     classification_prompt,
+    summary_prompt,
     translation_prompt,
 )
-from src.core.parsers import (
-    classification_parser,
-    summary_parser,
-    translation_parser,
-)
 
-# 1. Résumé automatique
-summary_chain = summary_prompt | llm | summary_parser
-
-# 2. Classification libre
-classification_chain = classification_prompt | llm | classification_parser
-
-# 3. Traduction
-translation_chain = translation_prompt | llm | translation_parser
+classification_chain = classification_prompt | llm.with_structured_output(ClassificationResult, method="json_schema")
+summary_chain = summary_prompt | llm.with_structured_output(SummaryResult, method="json_schema")
+translation_chain = translation_prompt | llm.with_structured_output(TranslationResult, method="json_schema")

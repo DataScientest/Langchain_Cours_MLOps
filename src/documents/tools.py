@@ -1,49 +1,31 @@
-from typing import List, Dict
-from langchain_core.documents import Document
 from langchain.tools import tool
-from .loaders import load_pdf, load_txt, load_markdown
+from .loaders import load_pdf
 from .cleaners import clean_text
-from .splitters import split_documents
 from .search import keyword_search
+from src.utils.token import count_tokens, truncate_to_tokens
 
-# === CHARGEMENT ===
-
-@tool("load_pdf_tool")
-def load_pdf_tool(path: str) -> List[Document]:
+@tool
+def load_pdf_tool(path: str):
+    """Loads a PDF and returns the extracted documents."""
     return load_pdf(path)
 
-@tool("load_txt_tool")
-def load_txt_tool(path: str) -> List[Document]:
-    return load_txt(path)
-
-@tool("load_markdown_tool")
-def load_markdown_tool(path: str) -> List[Document]:
-    return load_markdown(path)
-
-# === NETTOYAGE ===
-
-@tool("clean_text_tool")
+@tool
 def clean_text_tool(text: str) -> str:
+    """Cleans raw text before analysis."""
     return clean_text(text)
 
-# === SPLITTING ===
+@tool
+def count_tokens_tool(text: str) -> int:
+    """Counts the number of tokens in a text."""
+    return count_tokens(text)
 
-@tool("split_texts_tool")
-def split_texts_tool(input_data: Dict[str, List[Document]]) -> List[Document]:
-    docs = input_data["docs"]
-    return split_documents(docs, max_tokens=600, overlap_sentences=2)
+@tool
+def search_keyword_tool(chunks: list, query: str, k: int = 3) -> list:
+    """Searches for a keyword in a list of chunks."""
+    return keyword_search(chunks, query, k=k)
 
-# === RECHERCHE SIMPLE ===
-
-DOC_STORE: List[Document] = [] 
-
-@tool("set_corpus_tool")
-def set_corpus_tool(input_data: Dict[str, List[Document]]) -> str:
-    global DOC_STORE
-    docs = input_data["docs"]
-    DOC_STORE = docs
-    return f"Corpus initialisé avec {len(docs)} documents."
-
-@tool("search_keyword_tool")
-def search_keyword_tool(query: str) -> List[str]:
-    return keyword_search(DOC_STORE, query, k=3)
+@tool
+def read_pdf_excerpt_tool(path: str, max_tokens: int = 1500) -> str:
+    """Read a PDF and return a cleaned excerpt (start of the document) for analysis."""
+    text = " ".join(clean_text(doc.page_content) for doc in load_pdf(path))
+    return truncate_to_tokens(text, max_tokens)
